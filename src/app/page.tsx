@@ -1,103 +1,329 @@
+"use client"
+
+import { GBadge, GButton, GDropdownButton, GInputSearch, GSegmented, GTable } from "@gal-ui/components";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import ConfirmationModal from "@/components/ConfirmationModal";
+
+const dummyListCampaign = [{
+  id: 1,
+  campaignName: "Campaign 1",
+  banner: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1759578593/istockphoto-1442792588-1024x1024_wceobb.jpg',
+  status: "Draft",
+  startDate: "5 Aug 2025, 10:00 AM",
+  endDate: "5 Aug 2025, 11:00 AM",
+}, {
+  id: 2,
+  campaignName: "Campaign 2",
+  banner: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1759578593/istockphoto-1442792588-1024x1024_wceobb.jpg',
+  status: "Upcoming",
+  startDate: "5 Aug 2025, 10:00 AM",
+  endDate: "5 Aug 2025, 11:00 AM",
+}, {
+  id: 3,
+  campaignName: "Campaign 3",
+  banner: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1759578593/istockphoto-1442792588-1024x1024_wceobb.jpg',
+  status: "Ongoing",
+  startDate: "5 Aug 2025, 10:00 AM",
+  endDate: "5 Aug 2025, 12:00 PM",
+}, {
+  id: 4,
+  campaignName: "Campaign 4",
+  banner: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1759578593/istockphoto-1442792588-1024x1024_wceobb.jpg',
+  status: "Cancelled",
+  startDate: "5 Aug 2025, 10:00 AM",
+  endDate: "5 Aug 2025, 12:00 PM",
+}, {
+  id: 5,
+  campaignName: "Campaign 5",
+  banner: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1759578593/istockphoto-1442792588-1024x1024_wceobb.jpg',
+  status: "Ended",
+  startDate: "5 Aug 2025, 10:00 AM",
+  endDate: "5 Aug 2025, 12:00 PM",
+}]
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const router = useRouter();
+  const [activeSegment, setActiveSegment] = useState("all");
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+  // Filter campaigns based on active segment
+  const filteredCampaigns = activeSegment === "all"
+    ? dummyListCampaign
+    : dummyListCampaign.filter(campaign => campaign.status.toLowerCase() === activeSegment);
+
+  const handleSchedule = () => {
+    console.log("Schedule campaign:", selectedCampaign);
+    setIsScheduleModalOpen(false);
+    setSelectedCampaign(null);
+  };
+
+  const handleRemove = () => {
+    console.log("Remove campaign:", selectedCampaign);
+    setIsRemoveModalOpen(false);
+    setSelectedCampaign(null);
+  };
+
+  const handleCancel = () => {
+    console.log("Cancel campaign:", selectedCampaign);
+    setIsCancelModalOpen(false);
+    setSelectedCampaign(null);
+  };
+
+  const handlePublish = () => {
+    console.log("Publish campaign:", selectedCampaign);
+    setIsPublishModalOpen(false);
+    setSelectedCampaign(null);
+  };
+
+  const handleDownloadReport = (campaign: any) => {
+    console.log("Download report for:", campaign);
+    // TODO: Implement download report logic
+  };
+
+  const getActionItems = (record: any) => {
+    const actions = [];
+
+    if (record.status === "Draft") {
+      actions.push(
+
+        {
+          label: "Edit",
+          key: "edit",
+          onClick: () => router.push(`/view/${record.id}`),
+        },
+        {
+          label: "Schedule",
+          key: "schedule",
+          onClick: () => {
+            setSelectedCampaign(record);
+            setIsScheduleModalOpen(true);
+          },
+        },
+        {
+          label: "Remove",
+          key: "remove",
+          onClick: () => {
+            setSelectedCampaign(record);
+            setIsRemoveModalOpen(true);
+          },
+        }
+      );
+    } else if (record.status === "Upcoming") {
+      actions.push(
+        {
+          label: "View",
+          key: "view",
+          onClick: () => router.push(`/view/${record.id}`),
+        },
+        {
+          label: "Publish",
+          key: "publish",
+          onClick: () => {
+            setSelectedCampaign(record);
+            setIsPublishModalOpen(true);
+          },
+        },
+        {
+          label: "Cancel",
+          key: "cancel",
+          onClick: () => {
+            setSelectedCampaign(record);
+            setIsCancelModalOpen(true);
+          },
+        }
+      );
+    } else if (record.status === "Ongoing") {
+      actions.push(
+        {
+          label: "View",
+          key: "view",
+          onClick: () => router.push(`/view/${record.id}`),
+        },
+        {
+          label: "Cancel",
+          key: "cancel",
+          onClick: () => {
+            setSelectedCampaign(record);
+            setIsCancelModalOpen(true);
+          },
+        }
+      );
+    } else if (record.status === "Cancelled" || record.status === "Ended") {
+      actions.push(
+        {
+          label: "View",
+          key: "view",
+          onClick: () => router.push(`/view/${record.id}`),
+        },
+        {
+          label: "Download Report",
+          key: "download",
+          onClick: () => handleDownloadReport(record),
+        }
+      );
+    }
+
+    return actions;
+  };
+
+  const columns = [
+    {
+      title: "Banner",
+      dataIndex: "banner",
+      key: "banner",
+      render: (text: string) => (
+        <Image src={text} alt="banner" width={40} height={40} />
+      ),
+    }, {
+      title: "Campaign Name",
+      dataIndex: "campaignName",
+      key: "campaignName",
+    }, {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => {
+        const getBadgeType = (status: string) => {
+          switch (status) {
+            case "Draft":
+              return "gray";
+            case "Upcoming":
+              return "yellow";
+            case "Ongoing":
+              return "blue";
+            case "Cancelled":
+              return "red";
+            case "Ended":
+              return "default";
+            default:
+              return "default";
+          }
+        };
+
+        return (
+          <GBadge type={getBadgeType(status) as any}>
+            {status}
+          </GBadge>
+        );
+      },
+    }, {
+      title: "Start Date",
+      dataIndex: "startDate",
+      key: "startDate",
+    }, {
+      title: "End Date",
+      dataIndex: "endDate",
+      key: "endDate",
+    }, {
+      title: "Action",
+      dataIndex: "action",
+      key: "action",
+      render: (_: any, record: any) => {
+        return (
+          <GDropdownButton
+            menu={{
+              items: getActionItems(record)
+            }}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        )
+      },
+    }
+  ]
+  return (
+    <div className="p-[30px]">
+      <GSegmented
+        onChange={(value: string) => setActiveSegment(value)}
+        items={[
+          {
+            label: "All",
+            key: "all",
+          },
+          {
+            label: "Draft",
+            key: "draft",
+          },
+          {
+            label: "Upcoming",
+            key: "upcoming",
+          },
+          {
+            label: "Ongoing",
+            key: "ongoing",
+          },
+          {
+            label: "Cancelled",
+            key: "cancelled",
+          },
+          {
+            label: "Ended",
+            key: "ended",
+          },
+        ]}
+      />
+      <GTable
+        customHeader={
+          <div className="flex items-center justify-between">
+            <div className="w-[400px]">
+              <GInputSearch placeholder="Search" />
+            </div>
+            <GButton btn_type="primary" onClick={() => router.push("/create")}>Add Campaign</GButton>
+          </div>
+        }
+        columns={columns} dataSource={filteredCampaigns} />
+
+      {/* Schedule Campaign Modal */}
+      <ConfirmationModal
+        isOpen={isScheduleModalOpen}
+        onClose={() => setIsScheduleModalOpen(false)}
+        onConfirm={handleSchedule}
+        title="Schedule Campaign"
+        description={`Are you sure you want to schedule "${selectedCampaign?.campaignName}"? The campaign will be set to Upcoming status.`}
+        confirmText="Schedule"
+        cancelText="Cancel"
+        confirmButtonType="primary"
+      />
+
+      {/* Remove Campaign Modal */}
+      <ConfirmationModal
+        isOpen={isRemoveModalOpen}
+        onClose={() => setIsRemoveModalOpen(false)}
+        onConfirm={handleRemove}
+        title="Remove Campaign"
+        description={`Are you sure you want to remove "${selectedCampaign?.campaignName}"? This action cannot be undone.`}
+        confirmText="Remove"
+        cancelText="Cancel"
+        confirmButtonType="destructive"
+      />
+
+      {/* Cancel Campaign Modal */}
+      <ConfirmationModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        onConfirm={handleCancel}
+        title="Cancel Campaign"
+        description={`Are you sure you want to cancel "${selectedCampaign?.campaignName}"? This will stop the campaign immediately.`}
+        confirmText="Cancel Campaign"
+        cancelText="Go Back"
+        confirmButtonType="destructive"
+      />
+
+      {/* Publish Campaign Modal */}
+      <ConfirmationModal
+        isOpen={isPublishModalOpen}
+        onClose={() => setIsPublishModalOpen(false)}
+        onConfirm={handlePublish}
+        title="Publish Campaign"
+        description={`Are you sure you want to publish "${selectedCampaign?.campaignName}"? The campaign will go live immediately.`}
+        confirmText="Publish"
+        cancelText="Cancel"
+        confirmButtonType="primary"
+      />
     </div>
   );
 }
